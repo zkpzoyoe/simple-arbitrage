@@ -25,10 +25,8 @@ uni = UniswapV2Client(address, privkey, http_addr)
 erc20abi = json.load(open('./abi/erc20.abi'))
 
 def get_current_timestamp():
-   block = w3.eth.block_number()
-   print(block)
-   return block
-   return block['number']
+   block = w3.eth.getBlock('latest')
+   return block['timestamp']
 
 # gas
 def gasnow():

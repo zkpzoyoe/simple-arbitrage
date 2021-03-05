@@ -5,6 +5,7 @@ import time
 import random
 from common import *
 import networkx as nx
+import Pair
 
 class NotFound(Exception):
   pass
@@ -12,47 +13,11 @@ class NotFound(Exception):
 class CalFault(Exception):
   pass
 
-uni = UniswapV2Client(address, privkey, http_addr)
-
 def switch_decimal(c):
   if not isinstance(c, Decimal):
     return Decimal(c)
   else:
     return c
-
-def unique_name(token):
-  tok = token['address'].lower()
-  return token['symbol'] + "_" + tok[2:6]
-
-class UniSwapPair:
-  def __init__(self, uni, pair):
-    self.addr = pair['address']
-    self.tokens = [unique_name(pair['token0']), unique_name(pair['token1'])]
-    self.reserves = {
-      self.tokens[0]:0,
-      self.tokens[1]:0
-    }
-
-  def update(self):
-    reserves = uni.get_reserves(self.addr)
-    self.reserves = {
-      self.tokens[0]:reserves[0],
-      self.tokens[1]:reserves[1]
-    }
-
-  def exchange(self, input, output, amount):
-    d997 = Decimal(997)
-    d1000 = Decimal(1000)
-    reserve_in = switch_decimal(self.reserves[input])
-    reserve_out = switch_decimal(self.reserves[output])
-    try:
-      return d997*amount*reserve_out/(d1000*reserve_in+d997*amount)
-    #except decimal.DivisionUndefined as e:
-    except Exception as e:
-      raise e
-
-  def info(self):
-    return {"address":self.addr, "reserves":self.reserves}
 
 def reorder(c, key):
   l = len (c)
@@ -107,11 +72,11 @@ class Analysis:
     self.pairs = {}
     self.tokens = {}
     for p in pairs:
-      pair = UniSwapPair(uni, p)
-      src = unique_name(p['token0'])
-      dest = unique_name(p['token1'])
-      self.add_token(src, p['token0'])
-      self.add_token(dest, p['token1'])
+      pair = Pair.build(p)
+      src = erc20.unique_name(p.src)
+      dest = erc20.unique_name(p.dest)
+      self.add_token(src, erc20.get_token_info(p.src))
+      self.add_token(dest, erc20.get_token_info(p.dest))
       self.add_pair(src, dest, pair)
       self.tg.add_edge(src, dest)
     tc = nx.algorithms.cycles.cycle_basis(self.tg)
