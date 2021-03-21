@@ -1,12 +1,13 @@
 import firmware
 import json
+import redisdb
 from common import *
 from rejson import Client, Path
 rj = Client(host='localhost', port=6379, decode_responses=True)
 
 print("Current timestamp", get_current_timestamp())
-all_pairs = rj.jsonget("pairs").values()
-all_pair_address = rj.jsonget("pairs").keys()
-print(all_pairs)
-analysis = firmware.Analysis(all_pairs)
-analysis.scan_cycles()
+cycles = redisdb.get_all_paths()
+for c in cycles:
+  print(c)
+  if (c['rate'] > 0.0001):
+    print(c)

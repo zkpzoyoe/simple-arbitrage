@@ -9,6 +9,12 @@ from uniswap.uniswap import UniswapV2Utils as utils
 import threading
 import random
 
+def switch_decimal(c):
+  if not isinstance(c, Decimal):
+    return Decimal(c)
+  else:
+    return c
+
 config = json.load(open('config.json'))
 network = config['network']
 address = config['address']
